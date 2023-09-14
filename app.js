@@ -69,7 +69,10 @@ const verifyingParameterValues = (request, response, next) => {
   ) {
     response.status(400);
     response.send("Invalid Todo Category");
-  } else if (isValid(new Date(dueDate)) === false) {
+  } else if (
+    isValid(new Date(dueDate)) === false ||
+    dueDate === undefined
+  ) {
     response.status(400);
     response.send("Invalid Due Date");
   } else {
@@ -195,16 +198,17 @@ app.get("/todos/:todoId/", async (request, response) => {
 app.get("/agenda/", async (request, response) => {
   const { date } = request.query;
   const split = date.split("-");
-  const formatedDate = format(
-    new Date(split[0], parseInt(split[1]) - 1, split[2]),
-    "yyyy-MM-dd"
-  );
-  //console.log(date, formatedDate);
 
-  if (isValid(new Date(date)) === false) {
+  if (isValid(new Date(date)) === false || date === undefined) {
     response.status(400);
     response.send("Invalid Due Date");
   } else {
+      const formatedDate = format(
+      new Date(split[0], parseInt(split[1]) - 1, split[2]),
+      "yyyy-MM-dd"
+    );
+    //console.log(date, formatedDate);
+    
     const getTodoByDateQuery = `SELECT * FROM todo WHERE due_date = '${formatedDate}';`;
 
     const dbResponse = await db.all(getTodoByDateQuery);
